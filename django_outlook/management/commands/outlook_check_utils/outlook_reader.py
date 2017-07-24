@@ -1,4 +1,5 @@
-import win32com
+# coding=utf-8
+import win32com.client
 
 from djangoautoconf.local_key_manager import get_local_key
 
@@ -11,7 +12,10 @@ class OutlookReader(object):
     def get_inbox(self):
         if self.mailbox_name_pattern is None:
             self.mailbox_name_pattern = get_local_key("outlook_settings.mailbox_name_pattern")
-        return self.get_mailbox_folder(self.mailbox_name_pattern, "Inbox")
+        inbox = self.get_mailbox_folder(self.mailbox_name_pattern, "Inbox")
+        if inbox is None:
+            inbox = self.get_mailbox_folder(self.mailbox_name_pattern, u"收件箱")
+        return inbox
 
     def get_mailbox_folder(self, mailbox_pattern, folder_name):
         mailbox = self.get_mailbox(mailbox_pattern, self.outlook)
@@ -29,6 +33,10 @@ class OutlookReader(object):
     # noinspection PyMethodMayBeStatic
     def get_folder_in_mailbox(self, mailbox, folder_name):
         for folder_number in range(1, 100):
-            if folder_name in mailbox.Folders.Item(folder_number).Name:
-                return mailbox.Folders.Item(folder_number)
+            try:
+                folder = mailbox.Folders.Item(folder_number)
+            except:
+                return None
+            if folder_name in folder.Name:
+                return folder
 
