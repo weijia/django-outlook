@@ -52,7 +52,7 @@ class OutlookMail(object):
                      "topic:", unicode(self.outlook_mail.ConversationTopic), \
                      "category:", unicode(self.get_categories()), \
                      "unread:", unicode(self.outlook_mail.Unread), \
-                     "receivedTime", unicode(self.outlook_mail.receivedTime)
+                     "receivedTime", unicode(self.get_receive_datetime())
         self.logger.info(email_info)
 
 

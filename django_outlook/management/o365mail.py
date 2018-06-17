@@ -20,9 +20,11 @@ class O365Mail(MailToHandleBase):
         return getattr(self.raw_mail, name)
 
     def get_entry_id(self):
+        # Ref: https://stackoverflow.com/questions/2941995/python-ignore-incorrect-padding-error-when-base64-decoding
         return base64.b64decode(self.raw_mail.josn["id"], '-_').encode("hex")[-140:]
 
     def get_conversation_id(self):
+        # Ref https://stackoverflow.com/questions/2941995/python-ignore-incorrect-padding-error-when-base64-decoding
         return base64.b64decode(self.raw_mail.josn["conversationId"], '-_').encode("hex")[-32:]
 
     def get_categories(self):
@@ -39,3 +41,7 @@ class O365Mail(MailToHandleBase):
 
     def get_receive_datetime(self):
         return self.raw_mail.json["receivedDateTime"]
+
+    def get_mail_specific_link(self):
+        return "%s\n%s" % (self.get_one_note_link(), self.raw_mail.josn["webLink"])
+
