@@ -43,3 +43,5 @@ class MailToHandleBase(object):
                      "category:", unicode(self.get_categories())
         self.logger.info(email_info)
 
+    def get_body(self):
+        return None

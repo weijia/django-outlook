@@ -51,3 +51,6 @@ class O365Mail(MailToHandleBase):
     def get_mail_specific_link(self):
         return "%s\n%s" % (self.get_one_note_link(), self.raw_mail.json["webLink"])
 
+    def get_body(self):
+        return self.raw_mail.json["body"]["content"]
+
