@@ -1,5 +1,3 @@
-
-
 class OutlookMail(object):
     pre_check_attr_list = ["EntryID", "To"]
 
@@ -22,7 +20,7 @@ class OutlookMail(object):
         try:
             return unicode(self.outlook_mail.Categories).split(",")
         except AttributeError:
-            pass
+            return []
 
     def get_sender(self):
         try:
@@ -34,8 +32,8 @@ class OutlookMail(object):
     def get_mail_subject(self):
         return self.outlook_mail.Subject
 
-    def get_conversation_topic(self):
-        return self.outlook_mail.ConversationTopic
+    def get_receive_datetime(self):
+        return self.outlook_mail.receivedTime
 
     def __getattr__(self, name):
         try:
@@ -46,13 +44,13 @@ class OutlookMail(object):
 
     def dump_mail(self):
         # properties can be found at https://msdn.microsoft.com/en-us/library/office/dn320330.aspx
-        email_info = unicode(self.outlook_mail.Subject), unicode(self.outlook_mail.EntryID), \
+        email_info = unicode(self.get_subject()), unicode(self.get_entry_id()), \
                      unicode(self.get_sender()), \
                      unicode(self.outlook_mail.BodyFormat), "session: ", unicode(self.outlook_mail.Session), \
-                     "conversationID:", unicode(self.outlook_mail.ConversationID), \
+                     "conversationID:", unicode(self.get_conversation_id()), \
                      "c index:", unicode(self.outlook_mail.ConversationIndex), \
                      "topic:", unicode(self.outlook_mail.ConversationTopic), \
-                     "category:", unicode(self.outlook_mail.Categories), \
+                     "category:", unicode(self.get_categories()), \
                      "unread:", unicode(self.outlook_mail.Unread), \
                      "receivedTime", unicode(self.outlook_mail.receivedTime)
         self.logger.info(email_info)
