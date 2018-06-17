@@ -53,3 +53,10 @@ class OutlookReaderForO365(O365Base):
         for i in xrange(1, count):
             mail = self.fluent_inbox.fetch_next()[0]
             yield OutlookMail(O365Mail(mail))
+
+    def get_folder(self, mailbox_name_pattern):
+        fluent_inbox = FluentInbox().get_folder(by='DisplayName', value=mailbox_name_pattern)
+        return fluent_inbox
+
+    def move_mail(self, outlook_mail, target_folder):
+        outlook_mail.raw_mail.moveToFolder(target_folder["id"])

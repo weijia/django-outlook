@@ -1,9 +1,9 @@
-from django_outlook.management.commands.outlook_check_utils.outlook_reader import OutlookReader
+from django_outlook.management.commands.outlook_check_utils.outlook_reader import OutlookMailbox
 from iconizer.iconizer_consts import ICONIZER_SERVICE_NAME
 from iconizer.msg_service.msg_service_interface.msg_service_factory_interface import MsgServiceFactory
 
 
-class OutlookChecker(OutlookReader):
+class OutlookChecker(OutlookMailbox):
     def __init__(self):
         super(OutlookChecker, self).__init__()
         f = MsgServiceFactory()

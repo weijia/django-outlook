@@ -1,16 +1,19 @@
 # coding=utf-8
 import win32com
 
+from django_outlook.management.outlook_mail import OutlookMail
 from djangoautoconf.local_key_manager import get_local_key
 
 
-class OutlookReaderBase(object):
+class OutlookMailboxBase(object):
     def __init__(self, mailbox_name_pattern=None):
         self.outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
         self.__mailbox_name_pattern = mailbox_name_pattern
+        self.inbox = None
+        self.mailbox_items = None
 
-    def get_mailbox_folder(self, folder_name):
-        mailbox = self.__get_mailbox(self.__mailbox_name_pattern, self.outlook)
+    def get_folder(self, folder_name):
+        mailbox = self.__get_mailbox()
         return self.__get_folder_in_mailbox(mailbox, folder_name)
 
     def __get_mailbox(self):
@@ -41,9 +44,12 @@ class OutlookReaderBase(object):
                 return folder
 
     def enum_inbox_mails(self, count=1000):
+        self.inbox = self.get_inbox()
+        self.mailbox_items = self.inbox.Items
         mail = self.get_last_mail()
+        yield OutlookMail(mail)
         for cnt in range(1, self.max_process_emails):
-            yield mail
+            yield OutlookMail(mail)
             mail = self.get_previous_email()
 
     def get_last_mail(self):
@@ -59,9 +65,9 @@ class OutlookReaderBase(object):
             return None
 
 
-class OutlookReader(OutlookReaderBase):
+class OutlookMailbox(OutlookMailboxBase):
     def get_inbox(self):
-        inbox = self.get_mailbox_folder("Inbox")
+        inbox = self.get_folder("Inbox")
         if inbox is None:
-            inbox = self.get_mailbox_folder(u"收件箱")
+            inbox = self.get_folder(u"收件箱")
         return inbox
