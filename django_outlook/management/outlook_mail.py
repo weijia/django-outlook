@@ -28,9 +28,9 @@ class OutlookMail(object):
         except:
             sender = "No sender"
         return sender
-
-    def get_mail_subject(self):
-        return self.outlook_mail.Subject
+    #
+    # def get_mail_subject(self):
+    #     return self.outlook_mail.Subject
 
     def get_receive_datetime(self):
         return self.outlook_mail.receivedTime

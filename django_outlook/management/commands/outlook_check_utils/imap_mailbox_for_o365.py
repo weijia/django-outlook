@@ -49,10 +49,10 @@ class OutlookReaderForO365(O365Base):
 
     def enum_inbox_mails(self, count=1000):
         mail = self.fluent_inbox.fetch(1)[0]
-        yield OutlookMail(O365Mail(mail))
+        yield O365Mail(mail)
         for i in xrange(1, count):
             mail = self.fluent_inbox.fetch_next()[0]
-            yield OutlookMail(O365Mail(mail))
+            yield O365Mail(mail)
 
     def get_folder(self, mailbox_name_pattern):
         fluent_inbox = FluentInbox().get_folder(by='DisplayName', value=mailbox_name_pattern)

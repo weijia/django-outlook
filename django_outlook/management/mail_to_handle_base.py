@@ -1,9 +1,14 @@
 # noinspection PyMethodMayBeStatic
+import logging
+
+
 class MailToHandleBase(object):
+    logger = logging.getLogger("MailToHandleBase")
+
     def is_valid(self):
         return False
 
-    def get_senders(self):
+    def get_sender(self):
         return []
 
     def get_entry_id(self):
