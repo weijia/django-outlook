@@ -55,4 +55,6 @@ class OutlookMail(object):
                      "receivedTime", unicode(self.get_receive_datetime())
         self.logger.info(email_info)
 
+    def get_body(self):
+        return self.outlook_mail.body
 
