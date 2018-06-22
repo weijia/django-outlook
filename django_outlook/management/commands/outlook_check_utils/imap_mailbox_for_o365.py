@@ -59,4 +59,4 @@ class OutlookReaderForO365(O365Base):
         return fluent_inbox
 
     def move_mail(self, outlook_mail, target_folder):
-        outlook_mail.raw_mail.moveToFolder(target_folder["id"])
+        outlook_mail.raw_mail.moveToFolder(str(target_folder["id"]))

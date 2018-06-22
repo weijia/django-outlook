@@ -1,4 +1,7 @@
-class OutlookMail(object):
+from django_outlook.management.mail_to_handle_base import MailToHandleBase
+
+
+class OutlookMail(MailToHandleBase):
     pre_check_attr_list = ["EntryID", "To"]
 
     def __init__(self, mail):
@@ -28,9 +31,18 @@ class OutlookMail(object):
         except:
             sender = "No sender"
         return sender
-    #
-    # def get_mail_subject(self):
-    #     return self.outlook_mail.Subject
+
+    def get_subject(self):
+        return self.outlook_mail.Subject
+
+    def get_entry_id(self):
+        return self.outlook_mail.EntryID
+
+    def get_recipients(self):
+        return self.outlook_mail.To
+
+    def get_conversation_id(self):
+        return self.outlook_mail.ConversationId
 
     def get_receive_datetime(self):
         return self.outlook_mail.receivedTime

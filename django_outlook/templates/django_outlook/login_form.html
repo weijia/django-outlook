@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+
+{% block content %}
+<form id="bookingReqEditForm" action="" method="post" class="form-inline">
+    {% csrf_token %}
+    {{ form|bootstrap }}
+    <p>
+        <input type="submit" value="Login"/>
+    </p>
+</form>
+{% endblock %}

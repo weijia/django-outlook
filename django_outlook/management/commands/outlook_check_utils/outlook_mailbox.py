@@ -48,7 +48,7 @@ class OutlookMailboxBase(object):
         self.mailbox_items = self.inbox.Items
         mail = self.get_last_mail()
         yield OutlookMail(mail)
-        for cnt in range(1, self.max_process_emails):
+        for cnt in range(1, count):
             yield OutlookMail(mail)
             mail = self.get_previous_email()
 
