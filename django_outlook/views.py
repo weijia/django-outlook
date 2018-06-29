@@ -31,12 +31,14 @@ class O365AuthRedirectView(RedirectView):
         # article = get_object_or_404(Article, pk=kwargs['pk'])
         # article.update_counter()
         # return super().get_redirect_url(*args, **kwargs)
-        c = OutlookConnection()
-        auth_url, state = c.get_auth_url(get_local_key("o365_app_settings.o365_app_client_id"),
-                                         get_local_key("o365_app_settings.o365_app_secret")
-                                         )
+        c = OutlookConnection(get_local_key("o365_app_settings.o365_app_client_id"),
+                                         get_local_key("o365_app_settings.o365_app_secret"))
+        auth_url, state = c.get_auth_url()
         o, is_created = UserSocialAuth.objects.get_or_create(
-            user=self.request.user, provider="o365")
+            user=self.request.user,
+            provider="o365",
+            uid=self.request.user.username,
+        )
         o.extra_data = {"state": state}
         o.save()
         return auth_url
@@ -48,24 +50,20 @@ class OutlookLoginResultView(TemplateView):
     def get_context_data(self, **kwargs):
         # return super(OutlookLoginResultView, self).get_context_data(**kwargs)
         # param = retrieve_param(self.request)
-        c = OutlookConnection()
+        c = OutlookConnection(get_local_key("o365_app_settings.o365_app_client_id"),
+                                         get_local_key("o365_app_settings.o365_app_secret"))
         token_url = "%s/?%s" % ("https://localhost", self.request.META['QUERY_STRING'])
         social_auth = UserSocialAuth.objects.filter(
             user=self.request.user, provider="o365")[0]
 
         state = social_auth.extra_data["state"]
         try:
-            token = c.update_token(get_local_key("o365_app_settings.o365_app_client_id"),
-                                   get_local_key("o365_app_settings.o365_app_secret"),
-                                   token_url,
-                                   state
-                                   )
+            token = c.update_token(token_url, state)
             o, is_created = UserSocialAuth.objects.get_or_create(
                 user=self.request.user, provider="o365")
             o.extra_data = token
             o.save()
             res = {"json_key": str(token)}
         except Exception as e:
-            print e
-
-        return {"json_key": str(e.message)}
+            res = {"json_key": str(e.message)}
+        return res

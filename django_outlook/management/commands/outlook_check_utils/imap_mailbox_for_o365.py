@@ -1,51 +1,44 @@
-# coding=utf-8
 from O365 import Connection, FluentInbox
-from O365.fluent_message import Message
 from django_outlook.management.o365mail import O365Mail
-from django_outlook.management.outlook_mail import OutlookMail
+from django_outlook.o365_utils.connection import OutlookConnection
 
 from djangoautoconf.local_key_manager import get_local_key
 
 
-class O365Base(object):
-    def __init__(self):
-        """
-        :param mailbox_name_pattern: not used. This is kept only for be compatible with the pywin implementation
-        """
-        # Setup connection object
-        # Proxy call is required only if you are behind proxy
+def config_connection_using_config_template():
+    # Setup connection object
+    # Proxy call is required only if you are behind proxy
 
-        # Setup connection object
-        # This will provide you with auth url, open it and authentication and copy the resulting page url and
-        # paste it back in the input
-        o365_app_client_id = get_local_key("o365_app_settings.o365_app_client_id")
-        o365_app_secret = get_local_key("o365_app_settings.o365_app_secret")
-        Connection.oauth2(o365_app_client_id, o365_app_secret, store_token=True)
+    # Setup connection object
+    # This will provide you with auth url, open it and authentication and copy the resulting page url and
+    # paste it back in the input
+    o365_app_client_id = get_local_key("o365_app_settings.o365_app_client_id")
+    o365_app_secret = get_local_key("o365_app_settings.o365_app_secret")
+    Connection.oauth2(o365_app_client_id, o365_app_secret, store_token=True)
 
-        # Proxy call is required only if you are behind proxy
-        Connection.proxy(url='10.138.15.11',
-                         port=8080,
-                         username=get_local_key("laptop_account.username"),
-                         password=get_local_key("laptop_account.password")
-                         )
-        self.fluent_inbox = FluentInbox()
+    # Proxy call is required only if you are behind proxy
+    Connection.proxy(url=get_local_key("proxy_setting.http_proxy_host"),
+                     port=8080,
+                     username=get_local_key("laptop_account.username"),
+                     password=get_local_key("laptop_account.password")
+                     )
 
 
-class OutlookReaderForO365(O365Base):
-    def __init__(self, mailbox_name_pattern=None):
+class OutlookReaderForO365(object):
+    def __init__(self, mailbox_name_pattern=None, social_auth=None):
         """
         :param mailbox_name_pattern: not used, this parameter is only kept for be compatible with pywin32 implementation
         """
         super(OutlookReaderForO365, self).__init__()
+        if social_auth is None:
+            config_connection_using_config_template()
+        else:
+            o365_app_client_id = get_local_key("o365_app_settings.o365_app_client_id")
+            o365_app_secret = get_local_key("o365_app_settings.o365_app_secret")
+            self.connection = OutlookConnection(client_id=o365_app_client_id, client_secret=o365_app_secret)
+            self.connection.set_token(social_auth.extra_data)
 
-    # def get_inbox(self):
-    #     inbox = self.get_mailbox_folder(u'Inbox')
-    #     if inbox is None:
-    #         inbox = self.get_mailbox_folder(u"收件箱")
-    #     return inbox
-    #
-    # def get_mailbox_folder(self, folder_name):
-    #     return self.fluent_inbox.get_folder(by='DisplayName', value=folder_name)
+        self.fluent_inbox = FluentInbox()
 
     def enum_inbox_mails(self, count=1000):
         mail = self.fluent_inbox.fetch(1)[0]
