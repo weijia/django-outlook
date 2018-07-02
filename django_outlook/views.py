@@ -7,7 +7,7 @@ from django.views.generic import FormView, TemplateView, RedirectView
 # from django_th.forms.base import LoginForm
 from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSocialAuth
 
-from django_outlook.forms import LoginForm
+# from django_outlook.forms import LoginForm
 
 # class OutlookLoginFormView(FormView):
 #     form_class = LoginForm
