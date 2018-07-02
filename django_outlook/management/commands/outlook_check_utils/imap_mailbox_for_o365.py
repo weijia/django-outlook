@@ -25,18 +25,18 @@ def config_connection_using_config_template():
 
 
 class OutlookReaderForO365(object):
-    def __init__(self, mailbox_name_pattern=None, social_auth=None):
+    def __init__(self, mailbox_name_pattern=None, token=None):
         """
         :param mailbox_name_pattern: not used, this parameter is only kept for be compatible with pywin32 implementation
         """
         super(OutlookReaderForO365, self).__init__()
-        if social_auth is None:
+        if token is None:
             config_connection_using_config_template()
         else:
             o365_app_client_id = get_local_key("o365_app_settings.o365_app_client_id")
             o365_app_secret = get_local_key("o365_app_settings.o365_app_secret")
             self.connection = OutlookConnection(client_id=o365_app_client_id, client_secret=o365_app_secret)
-            self.connection.set_token(social_auth.extra_data)
+            self.connection.set_token(token)
 
         self.fluent_inbox = FluentInbox()
 
