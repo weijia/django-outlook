@@ -19,5 +19,5 @@ from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSo
 class MailHandler(TimeStampedModel):
     auth = models.ForeignKey(UserSocialAuth)
     action = models.CharField(max_length=1024)
-    parameters = JSONField()
+    parameters = JSONField(null=True, blank=True)
     is_enabled = models.BooleanField(default=True)

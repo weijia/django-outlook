@@ -54,11 +54,11 @@ class O365Mail(MailToHandleBase):
         return "%s\n%s" % (self.get_one_note_link(), self.raw_mail.json["webLink"])
 
     def get_body(self):
-        self._html_to_text(self.raw_mail.json["body"]["content"])
+        return self._html_to_text(self.raw_mail.json["body"]["content"])
 
     def _html_to_text(self, html):
         # https://stackoverflow.com/questions/328356/extracting-text-from-html-file-using-python
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "lxml")
 
         # kill all script and style elements
         for script in soup(["script", "style"]):

@@ -53,14 +53,14 @@ class OutlookLoginResultView(TemplateView):
         c = OutlookConnection(get_local_key("o365_app_settings.o365_app_client_id"),
                                          get_local_key("o365_app_settings.o365_app_secret"))
         token_url = "%s/?%s" % ("https://localhost", self.request.META['QUERY_STRING'])
-        social_auth = UserSocialAuth.objects.filter(
-            user=self.request.user, provider="o365")[0]
+        social_auth = UserSocialAuth.objects.get(
+            user=self.request.user, provider="o365", uid=self.request.user.username)
 
         state = social_auth.extra_data["state"]
         try:
             token = c.update_token(token_url, state)
             o, is_created = UserSocialAuth.objects.get_or_create(
-                user=self.request.user, provider="o365")
+                user=self.request.user, provider="o365", uid=self.request.user.username)
             o.extra_data = token
             o.save()
             res = {"json_key": str(token)}
