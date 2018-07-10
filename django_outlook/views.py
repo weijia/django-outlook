@@ -17,6 +17,7 @@ from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSo
 #         get_auth_url()
 #         return super(OutlookLoginFormView, self).form_valid(form)
 from django_outlook.o365_utils.connection import OutlookConnection
+from django_outlook.o365_utils.mailbox_adv import AdvO365Mailbox
 from djangoautoconf.django_utils import retrieve_param
 from djangoautoconf.local_key_manager import get_local_key
 
@@ -36,7 +37,7 @@ class O365AuthRedirectView(RedirectView):
         auth_url, state = c.get_auth_url()
         o, is_created = UserSocialAuth.objects.get_or_create(
             user=self.request.user,
-            provider="o365",
+            provider="o365-ongoing",
             uid=self.request.user.username,
         )
         o.extra_data = {"state": state}
@@ -54,14 +55,23 @@ class OutlookLoginResultView(TemplateView):
                                          get_local_key("o365_app_settings.o365_app_secret"))
         token_url = "%s/?%s" % ("https://localhost", self.request.META['QUERY_STRING'])
         social_auth = UserSocialAuth.objects.get(
-            user=self.request.user, provider="o365", uid=self.request.user.username)
+            user=self.request.user,
+            provider="o365-ongoing",
+            uid=self.request.user.username
+        )
 
         state = social_auth.extra_data["state"]
         try:
             token = c.update_token(token_url, state)
-            o, is_created = UserSocialAuth.objects.get_or_create(
-                user=self.request.user, provider="o365", uid=self.request.user.username)
+            o = UserSocialAuth.objects.get(
+                user=self.request.user,
+                provider="o365-ongoing",
+                uid=self.request.user.username
+            )
             o.extra_data = token
+            me = AdvO365Mailbox().get_me()
+            o.uid = me["mail"]
+            o.provider = "o365"
             o.save()
             res = {"json_key": str(token)}
         except Exception as e:

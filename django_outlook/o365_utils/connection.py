@@ -46,6 +46,7 @@ class OutlookConnection(object):
                                               scope=[
                                                   'https://graph.microsoft.com/Mail.ReadWrite',
                                                   'https://graph.microsoft.com/Mail.Send',
+                                                  'https://graph.microsoft.com/User.Read',
                                                   # 'https://outlook.office.com/mail.readwrite',
                                                   'offline_access',
                                                   'https://graph.microsoft.com/mailboxsettings.readwrite'

@@ -1,6 +1,7 @@
 from O365 import Connection, FluentInbox
 from django_outlook.management.o365mail import O365Mail
 from django_outlook.o365_utils.connection import OutlookConnection
+from django_outlook.o365_utils.mailbox_adv import AdvO365Mailbox
 
 from djangoautoconf.local_key_manager import get_local_key
 
@@ -39,8 +40,10 @@ class OutlookReaderForO365(object):
             self.connection.set_token(token)
 
         self.fluent_inbox = FluentInbox()
+        self.adv_mailbox = AdvO365Mailbox()
 
     def enum_inbox_mails(self, count=1000):
+        text = self.adv_mailbox.get_me()
         mail = self.fluent_inbox.fetch(1)[0]
         yield O365Mail(mail)
         for i in xrange(1, count):
