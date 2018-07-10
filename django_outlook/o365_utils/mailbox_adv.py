@@ -47,3 +47,4 @@ class AdvO365Mailbox(FluentInbox):
         :return: URL to use for requests
         """
         return AdvO365Mailbox.adv_urls[key][Connection().api_version]
+

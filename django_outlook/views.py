@@ -2,10 +2,10 @@
 # from allauth.socialaccount.providers.openid.forms import LoginForm
 # from cms.test_utils.project.sampleapp.forms import LoginForm
 # from allauth.account.forms import LoginForm
-from django.views.generic import FormView, TemplateView, RedirectView
+from django.views.generic import TemplateView, RedirectView
 
 # from django_th.forms.base import LoginForm
-from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSocialAuth
+# from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSocialAuth
 
 # from django_outlook.forms import LoginForm
 
@@ -16,9 +16,7 @@ from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSo
 #     def form_valid(self, form):
 #         get_auth_url()
 #         return super(OutlookLoginFormView, self).form_valid(form)
-from django_outlook.o365_utils.connection import OutlookConnection
-from django_outlook.o365_utils.mailbox_adv import AdvO365Mailbox
-from djangoautoconf.django_utils import retrieve_param
+from django_outlook.o365_utils.adv_connection import OutlookConnection
 from djangoautoconf.local_key_manager import get_local_key
 
 
@@ -34,14 +32,7 @@ class O365AuthRedirectView(RedirectView):
         # return super().get_redirect_url(*args, **kwargs)
         c = OutlookConnection(get_local_key("o365_app_settings.o365_app_client_id"),
                                          get_local_key("o365_app_settings.o365_app_secret"))
-        auth_url, state = c.get_auth_url()
-        o, is_created = UserSocialAuth.objects.get_or_create(
-            user=self.request.user,
-            provider="o365-ongoing",
-            uid=self.request.user.username,
-        )
-        o.extra_data = {"state": state}
-        o.save()
+        auth_url, state = c.get_auth_url(self.request.user)
         return auth_url
 
 
@@ -54,26 +45,6 @@ class OutlookLoginResultView(TemplateView):
         c = OutlookConnection(get_local_key("o365_app_settings.o365_app_client_id"),
                                          get_local_key("o365_app_settings.o365_app_secret"))
         token_url = "%s/?%s" % ("https://localhost", self.request.META['QUERY_STRING'])
-        social_auth = UserSocialAuth.objects.get(
-            user=self.request.user,
-            provider="o365-ongoing",
-            uid=self.request.user.username
-        )
 
-        state = social_auth.extra_data["state"]
-        try:
-            token = c.update_token(token_url, state)
-            o = UserSocialAuth.objects.get(
-                user=self.request.user,
-                provider="o365-ongoing",
-                uid=self.request.user.username
-            )
-            o.extra_data = token
-            me = AdvO365Mailbox().get_me()
-            o.uid = me["mail"]
-            o.provider = "o365"
-            o.save()
-            res = {"json_key": str(token)}
-        except Exception as e:
-            res = {"json_key": str(e.message)}
+        res = c.update_extra_data(self.request.user, token_url)
         return res
