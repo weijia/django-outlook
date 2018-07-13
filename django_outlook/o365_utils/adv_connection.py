@@ -7,7 +7,7 @@ from requests_oauthlib import OAuth2Session
 from social.apps.django_app.default.models import UserSocialAuth
 
 from O365 import Connection
-from django_outlook.o365_utils.mailbox_adv import AdvO365Mailbox
+from django_outlook.o365_utils.token_storage import TokenStorage
 from djangoautoconf.local_key_manager import get_local_key
 
 
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class OutlookConnection(object):
-    def __init__(self, client_id, client_secret):
+    def __init__(self, client_id, client_secret, user_mail=None):
         super(OutlookConnection, self).__init__()
         self.client_id = client_id
         self.client_secret = client_secret
@@ -26,6 +26,8 @@ class OutlookConnection(object):
         self.connection.api_version = '2.0'
         self.connection.client_id = self.client_id
         self.connection.client_secret = self.client_secret
+        self.user_email = user_mail
+        self.token_storage = TokenStorage()
 
         # Proxy call is required only if you are behind proxy
         Connection.proxy(url=get_local_key("proxy_setting.http_proxy_host"),
@@ -41,13 +43,7 @@ class OutlookConnection(object):
             url=Connection._oauth2_authorize_url,
             access_type='offline')
         username = user.username
-        o, is_created = UserSocialAuth.objects.get_or_create(
-            user=user,
-            provider="o365-ongoing",
-            uid=username,
-        )
-        o.extra_data = {"state": state}
-        o.save()
+        self.token_storage.save_state(state)
 
         return auth_url, state
 
@@ -87,24 +83,11 @@ class OutlookConnection(object):
         state = social_auth.extra_data["state"]
         try:
             token = self.update_token(token_url, state)
-            o = self._get_ongoing_social_auth(user)
-            o.extra_data = token
-            me = AdvO365Mailbox().get_me()
-            o.uid = me["mail"]
-            o.provider = "o365"
-            o.save()
+            self.token_storage.save_token(token)
             res = {"json_key": str(token)}
         except Exception as e:
             res = {"json_key": str(e.message)}
         return res
-
-    @staticmethod
-    def _get_ongoing_social_auth(user):
-        return UserSocialAuth.objects.get(
-            user=user,
-            provider="o365-ongoing",
-            uid=user.username
-        )
 
     @staticmethod
     def get_response(request_url, **kwargs):
@@ -144,9 +127,22 @@ class OutlookConnection(object):
                 token = connection.oauth.refresh_token(Connection._oauth2_token_url, client_id=connection.client_id,
                                                        client_secret=connection.client_secret)
                 log.info('New token fetched')
-                save_token(token)
+                self.token_storage.save_token(token)
 
                 response = connection.oauth.get(request_url, **con_params)
         log.info('Received response from URL {}'.format(response.url))
         response_json = response.json()
         return response_json
+
+    def get_me(self):
+        """
+        :return: Current auto reply setting
+        """
+        auto_reply_setting_url = 'https://graph.microsoft.com/v1.0/me'
+
+        response = self.get_common_response(auto_reply_setting_url,
+                                                         # verify=self.verify,
+                                                         # params={'$top': 100}
+                                                         )
+
+        return response

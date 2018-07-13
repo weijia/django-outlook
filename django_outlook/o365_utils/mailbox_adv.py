@@ -1,4 +1,5 @@
 from O365 import FluentInbox, Connection
+from django_outlook.o365_utils.adv_connection import OutlookConnection
 
 
 class AdvO365Mailbox(FluentInbox):
@@ -19,23 +20,10 @@ class AdvO365Mailbox(FluentInbox):
         """
         auto_reply_setting_url = AdvO365Mailbox._get_url_v2('auto_reply_setting')
 
-        response = Connection.get_common_response(auto_reply_setting_url,
-                                                  # verify=self.verify,
-                                                  # params={'$top': 100}
-                                                  )
-
-        return response
-
-    def get_me(self):
-        """
-        :return: Current auto reply setting
-        """
-        auto_reply_setting_url = AdvO365Mailbox._get_url_v2('me')
-
-        response = Connection.get_common_response(auto_reply_setting_url,
-                                                  # verify=self.verify,
-                                                  # params={'$top': 100}
-                                                  )
+        response = OutlookConnection.get_common_response(auto_reply_setting_url,
+                                                         # verify=self.verify,
+                                                         # params={'$top': 100}
+                                                         )
 
         return response
 
@@ -47,4 +35,3 @@ class AdvO365Mailbox(FluentInbox):
         :return: URL to use for requests
         """
         return AdvO365Mailbox.adv_urls[key][Connection().api_version]
-
