@@ -4,9 +4,7 @@ import os
 from oauthlib.oauth2 import TokenExpiredError
 from requests_oauthlib import OAuth2Session
 
-from O365 import Connection
 from O365.connection import MicroDict
-from django_outlook.o365_utils.token_storage import TokenStorage
 from djangoautoconf.local_key_manager import get_local_key
 
 log = logging.getLogger(__name__)
@@ -26,6 +24,8 @@ class OutlookConnection(object):
         self.client_secret = self.client_secret
         self.token_storage = token_storage
         self.proxy_dict = None
+        self.oauth = None
+        self.auth = None
 
         # Proxy call is required only if you are behind proxy
         self.set_proxy(url=get_local_key("proxy_setting.http_proxy_host"),
@@ -48,6 +48,10 @@ class OutlookConnection(object):
             "https": "https://{}:{}@{}:{}".format(username, password, url,
                                                   port),
         }
+
+    def load_token(self):
+        self.oauth = OAuth2Session(client_id=self.client_id,
+                                         token=self.token_storage.get_token())
 
     def get_auth_url(self):
         self._set_oauth_session()

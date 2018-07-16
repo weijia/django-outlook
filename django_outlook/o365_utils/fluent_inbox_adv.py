@@ -6,7 +6,7 @@ from django_outlook.o365_utils.adv_connection import OutlookConnection
 log = logging.getLogger(__name__)
 
 
-class FluentInbox(object):
+class FluentInboxAdv(object):
     url_dict = {
         'inbox': {
             '1.0': 'https://outlook.office365.com/api/v1.0/me/messages',
@@ -33,7 +33,7 @@ class FluentInbox(object):
 
         :param verify: whether or not to verify SSL certificate
         """
-        self.url = FluentInbox._get_url('inbox')
+        self.url = FluentInboxAdv._get_url('inbox')
         self.fetched_count = 0
         self._filter = ''
         self._search = ''
@@ -47,9 +47,9 @@ class FluentInbox(object):
         :param folder_name: name of the outlook folder
         """
         self._reset()
-        response = self.connection.get_response(FluentInbox._get_url('folders'),
-                                           verify=self.verify,
-                                           params={'$top': 100})
+        response = self.connection.get_response(FluentInboxAdv._get_url('folders'),
+                                                verify=self.verify,
+                                                params={'$top': 100})
 
         folder_id = None
         all_folders = []
@@ -65,7 +65,7 @@ class FluentInbox(object):
             raise RuntimeError('Folder "{}" is not found, available folders '
                                'are {}'.format(folder_name, all_folders))
 
-        self.url = FluentInbox._get_url('folder').format(folder_id=folder_id)
+        self.url = FluentInboxAdv._get_url('folder').format(folder_id=folder_id)
 
         return self
 
@@ -88,14 +88,14 @@ class FluentInbox(object):
         :returns: Single folder data
         """
         if parent_id:
-            folders_url = FluentInbox._get_url('child_folders').format(
+            folders_url = FluentInboxAdv._get_url('child_folders').format(
                 folder_id=parent_id)
         else:
-            folders_url = FluentInbox._get_url('folders')
+            folders_url = FluentInboxAdv._get_url('folders')
 
         response = self.connection.get_response(folders_url,
-                                           verify=self.verify,
-                                           params={'$top': 100})
+                                                verify=self.verify,
+                                                params={'$top': 100})
 
         folder_id = None
         all_folders = []
@@ -117,14 +117,14 @@ class FluentInbox(object):
         :return: List of all folder data
         """
         if parent_id:
-            folders_url = FluentInbox._get_url('child_folders').format(
+            folders_url = FluentInboxAdv._get_url('child_folders').format(
                 folder_id=parent_id)
         else:
-            folders_url = FluentInbox._get_url('folders')
+            folders_url = FluentInboxAdv._get_url('folders')
 
         response = self.connection.get_response(folders_url,
-                                           verify=self.verify,
-                                           params={'$top': 100})
+                                                verify=self.verify,
+                                                params={'$top': 100})
 
         folders = []
         for folder in response:
@@ -197,12 +197,12 @@ class FluentInbox(object):
                       '$skip': skip_count}
 
         response = self.connection.get_response(self.url, verify=self.verify,
-                                           params=params)
+                                                params=params)
         self.fetched_count += count
 
         messages = []
         for message in response:
-            messages.append(Message(message, self.connection().auth))
+            messages.append(Message(message, self.connection.auth))
 
         return messages
 
@@ -213,7 +213,7 @@ class FluentInbox(object):
         :param key: the key for which url is required
         :return: URL to use for requests
         """
-        return FluentInbox.url_dict[key][OutlookConnection.api_version]
+        return FluentInboxAdv.url_dict[key][OutlookConnection.api_version]
 
     def _reset(self):
         """ Resets the current reference """

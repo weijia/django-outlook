@@ -1,29 +1,8 @@
-from O365 import Connection, FluentInbox
+from O365 import FluentInbox
 from django_outlook.management.o365mail import O365Mail
 from django_outlook.o365_utils.adv_connection import OutlookConnection
-from django_outlook.o365_utils.mailbox_adv import AdvO365Mailbox
-from django_outlook.o365_utils.token_storage import TokenStorage
-
+from django_outlook.o365_utils.fluent_inbox_adv import FluentInboxAdv
 from djangoautoconf.local_key_manager import get_local_key
-
-
-def config_connection_using_config_template():
-    # Setup connection object
-    # Proxy call is required only if you are behind proxy
-
-    # Setup connection object
-    # This will provide you with auth url, open it and authentication and copy the resulting page url and
-    # paste it back in the input
-    o365_app_client_id = get_local_key("o365_app_settings.o365_app_client_id")
-    o365_app_secret = get_local_key("o365_app_settings.o365_app_secret")
-    Connection.oauth2(o365_app_client_id, o365_app_secret, store_token=True)
-
-    # Proxy call is required only if you are behind proxy
-    Connection.proxy(url=get_local_key("proxy_setting.http_proxy_host"),
-                     port=8080,
-                     username=get_local_key("laptop_account.username"),
-                     password=get_local_key("laptop_account.password")
-                     )
 
 
 class OutlookReaderForO365(object):
@@ -39,12 +18,10 @@ class OutlookReaderForO365(object):
                                             client_secret=o365_app_secret,
                                             token_storage=token_storage,
                                             )
-
-        self.fluent_inbox = FluentInbox()
-        self.adv_mailbox = AdvO365Mailbox()
+        self.connection.load_token()
+        self.fluent_inbox = FluentInboxAdv(connection=self.connection)
 
     def enum_inbox_mails(self, count=1000):
-        text = self.adv_mailbox.get_me()
         mail = self.fluent_inbox.fetch(1)[0]
         yield O365Mail(mail)
         for i in xrange(1, count):

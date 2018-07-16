@@ -26,6 +26,12 @@ class TokenStorage(object):
         self.current_user = current_user
         self.mail_of_user_grant_the_token = mail_of_user_grant_the_token
 
+    def get_token(self):
+        if self.mail_of_user_grant_the_token is None:
+            raise EmailForUserToAccessDoesNotExist
+        auth = self.get_auth_obj()
+        return auth.extra_data
+
     def save_first_token(self, token, mail_of_user_grant_the_token):
         o = self._get_ongoing_social_auth()
         o.extra_data = token
@@ -36,13 +42,17 @@ class TokenStorage(object):
     def save_token(self, token):
         if self.mail_of_user_grant_the_token is None:
             raise EmailForUserToAccessDoesNotExist
+        o = self.get_auth_obj()
+        o.extra_data = token
+        o.save()
+
+    def get_auth_obj(self):
         o = UserSocialAuth.objects.get(
             user=self.current_user,
             provider=self.PROVIDER,
             uid=self.get_uid(),
         )
-        o.extra_data = token
-        o.save()
+        return o
 
     def _get_ongoing_social_auth(self):
         return UserSocialAuth.objects.get(
