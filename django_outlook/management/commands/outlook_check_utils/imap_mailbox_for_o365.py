@@ -1,7 +1,8 @@
 from O365 import Connection, FluentInbox
 from django_outlook.management.o365mail import O365Mail
-from django_outlook.o365_utils.connection import OutlookConnection
+from django_outlook.o365_utils.adv_connection import OutlookConnection
 from django_outlook.o365_utils.mailbox_adv import AdvO365Mailbox
+from django_outlook.o365_utils.token_storage import TokenStorage
 
 from djangoautoconf.local_key_manager import get_local_key
 
@@ -26,18 +27,18 @@ def config_connection_using_config_template():
 
 
 class OutlookReaderForO365(object):
-    def __init__(self, mailbox_name_pattern=None, token=None):
+    def __init__(self, mailbox_name_pattern=None, token_storage=None):
         """
         :param mailbox_name_pattern: not used, this parameter is only kept for be compatible with pywin32 implementation
         """
         super(OutlookReaderForO365, self).__init__()
-        if token is None:
-            config_connection_using_config_template()
-        else:
-            o365_app_client_id = get_local_key("o365_app_settings.o365_app_client_id")
-            o365_app_secret = get_local_key("o365_app_settings.o365_app_secret")
-            self.connection = OutlookConnection(client_id=o365_app_client_id, client_secret=o365_app_secret)
-            self.connection.set_token(token)
+        o365_app_client_id = get_local_key("o365_app_settings.o365_app_client_id")
+        o365_app_secret = get_local_key("o365_app_settings.o365_app_secret")
+
+        self.connection = OutlookConnection(client_id=o365_app_client_id,
+                                            client_secret=o365_app_secret,
+                                            token_storage=token_storage,
+                                            )
 
         self.fluent_inbox = FluentInbox()
         self.adv_mailbox = AdvO365Mailbox()
