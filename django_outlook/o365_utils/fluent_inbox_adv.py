@@ -2,6 +2,7 @@ import logging
 
 from O365.fluent_message import Message
 from django_outlook.o365_utils.adv_connection import OutlookConnection
+from django_outlook.o365_utils.fluent_message_adv import MessageWithProxy
 
 log = logging.getLogger(__name__)
 
@@ -202,7 +203,7 @@ class FluentInboxAdv(object):
 
         messages = []
         for message in response:
-            messages.append(Message(message, self.connection.auth))
+            messages.append(MessageWithProxy(message, self.connection))
 
         return messages
 

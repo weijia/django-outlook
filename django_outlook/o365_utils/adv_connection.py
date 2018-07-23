@@ -25,7 +25,7 @@ class OutlookConnection(object):
         self.token_storage = token_storage
         self.proxy_dict = None
         self.oauth = None
-        self.auth = None
+        # self.auth = None
 
         # Proxy call is required only if you are behind proxy
         self.set_proxy(url=get_local_key("proxy_setting.http_proxy_host"),
@@ -120,6 +120,27 @@ class OutlookConnection(object):
         log.info('Requesting URL: {}'.format(request_url))
         try:
             response = self.oauth.get(request_url, **con_params)
+        except TokenExpiredError:
+            log.info('Token is expired, fetching a new token')
+            token = self.oauth.refresh_token(self._oauth2_token_url,
+                                             client_id=self.client_id,
+                                             client_secret=self.client_secret)
+            log.info('New token fetched')
+            self.token_storage.save_token(token)
+
+            response = self.oauth.get(request_url, **con_params)
+        log.info('Received response from URL {}'.format(response.url))
+        response_json = response.json()
+        return response_json
+
+    def post_common_response(self, request_url, **kwargs):
+        con_params = {}
+        if self.proxy_dict:
+            con_params['proxies'] = self.proxy_dict
+        con_params.update(kwargs)
+        log.info('Requesting URL: {}'.format(request_url))
+        try:
+            response = self.oauth.post(request_url, **con_params)
         except TokenExpiredError:
             log.info('Token is expired, fetching a new token')
             token = self.oauth.refresh_token(self._oauth2_token_url,

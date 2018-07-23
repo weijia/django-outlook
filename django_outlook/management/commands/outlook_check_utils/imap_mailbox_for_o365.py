@@ -29,7 +29,8 @@ class OutlookReaderForO365(object):
             yield O365Mail(mail)
 
     def get_folder(self, mailbox_name_pattern):
-        fluent_inbox = FluentInbox().get_folder(by='DisplayName', value=mailbox_name_pattern)
+        fluent_inbox = FluentInboxAdv(connection=self.connection).get_folder(by='DisplayName',
+                                                                             value=mailbox_name_pattern)
         return fluent_inbox
 
     def move_mail(self, outlook_mail, target_folder):
