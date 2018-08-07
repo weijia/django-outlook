@@ -121,12 +121,7 @@ class OutlookConnection(object):
         try:
             response = self.oauth.get(request_url, **con_params)
         except TokenExpiredError:
-            log.info('Token is expired, fetching a new token')
-            token = self.oauth.refresh_token(self._oauth2_token_url,
-                                             client_id=self.client_id,
-                                             client_secret=self.client_secret)
-            log.info('New token fetched')
-            self.token_storage.save_token(token)
+            self.refresh_token()
 
             response = self.oauth.get(request_url, **con_params)
         log.info('Received response from URL {}'.format(response.url))
@@ -142,17 +137,20 @@ class OutlookConnection(object):
         try:
             response = self.oauth.post(request_url, **con_params)
         except TokenExpiredError:
-            log.info('Token is expired, fetching a new token')
-            token = self.oauth.refresh_token(self._oauth2_token_url,
-                                             client_id=self.client_id,
-                                             client_secret=self.client_secret)
-            log.info('New token fetched')
-            self.token_storage.save_token(token)
+            self.refresh_token()
 
-            response = self.oauth.get(request_url, **con_params)
+            response = self.oauth.post(request_url, **con_params)
         log.info('Received response from URL {}'.format(response.url))
         response_json = response.json()
         return response_json
+
+    def refresh_token(self):
+        log.info('Token is expired, fetching a new token')
+        token = self.oauth.refresh_token(self._oauth2_token_url,
+                                         client_id=self.client_id,
+                                         client_secret=self.client_secret)
+        log.info('New token fetched')
+        self.token_storage.save_token(token)
 
     def get_me(self):
         """
