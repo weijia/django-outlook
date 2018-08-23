@@ -92,8 +92,8 @@ class TokenStorage(object):
         self.mail_of_user_grant_the_token = mail
 
     def is_stored_social_auth_exists(self, uid):
-        return UserSocialAuth.objects.exists(
+        return UserSocialAuth.objects.filter(
             user=self.current_user,
             provider=self.PROVIDER,
             uid=uid,
-        )
+        ).exists()

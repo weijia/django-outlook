@@ -72,5 +72,5 @@ class OutlookMailbox(OutlookMailboxBase):
             inbox = self.get_folder(u"收件箱")
         return inbox
 
-    def move_mail(self, outlook_mail, resolved_items_folder):
-        outlook_mail.move(resolved_items_folder)
+    # def move_mail(self, outlook_mail, resolved_items_folder):
+    #     outlook_mail.move(resolved_items_folder)

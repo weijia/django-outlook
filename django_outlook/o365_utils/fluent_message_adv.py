@@ -152,6 +152,7 @@ class MessageWithProxy(object):
                                                             verify=self.verify,
                                                             )
         except Exception as e:
+            print("Moving error")
             return False
 
         return True
