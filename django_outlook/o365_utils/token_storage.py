@@ -34,10 +34,21 @@ class TokenStorage(object):
 
     def save_first_token(self, token, mail_of_user_grant_the_token):
         o = self._get_ongoing_social_auth()
+        if self.is_stored_social_auth_exists(mail_of_user_grant_the_token):
+            o.delete()
+            o = self.get_stored_social_auth(mail_of_user_grant_the_token)
+        else:
+            o.uid = mail_of_user_grant_the_token
+            o.provider = self.PROVIDER
         o.extra_data = token
-        o.uid = mail_of_user_grant_the_token
-        o.provider = self.PROVIDER
         o.save()
+
+    def get_stored_social_auth(self, uid):
+        return UserSocialAuth.objects.get(
+            user=self.current_user,
+            provider=self.PROVIDER,
+            uid=uid,
+        )
 
     def save_token(self, token):
         if self.mail_of_user_grant_the_token is None:
@@ -47,12 +58,7 @@ class TokenStorage(object):
         o.save()
 
     def get_auth_obj(self):
-        o = UserSocialAuth.objects.get(
-            user=self.current_user,
-            provider=self.PROVIDER,
-            uid=self.get_uid(),
-        )
-        return o
+        return self.get_stored_social_auth(self.get_uid())
 
     def _get_ongoing_social_auth(self):
         return UserSocialAuth.objects.get(
@@ -84,3 +90,10 @@ class TokenStorage(object):
 
     def set_mail_of_user_grant_the_token(self, mail):
         self.mail_of_user_grant_the_token = mail
+
+    def is_stored_social_auth_exists(self, uid):
+        return UserSocialAuth.objects.filter(
+            user=self.current_user,
+            provider=self.PROVIDER,
+            uid=uid,
+        ).exists()

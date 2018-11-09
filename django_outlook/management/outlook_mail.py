@@ -70,3 +70,6 @@ class OutlookMail(MailToHandleBase):
     def get_body(self):
         return self.outlook_mail.body
 
+    def move_to_folder(self, target_folder):
+        self.outlook_mail.move(target_folder)
+

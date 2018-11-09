@@ -75,3 +75,6 @@ class O365Mail(MailToHandleBase):
         text = '\n'.join(chunk for chunk in chunks if chunk)
 
         return text
+
+    def move_to_folder(self, target_folder):
+        self.raw_mail.moveToFolder(target_folder)

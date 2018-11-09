@@ -31,7 +31,7 @@ class OutlookReaderForO365(object):
     def get_folder(self, mailbox_name_pattern):
         fluent_inbox = FluentInboxAdv(connection=self.connection).get_folder(by='DisplayName',
                                                                              value=mailbox_name_pattern)
-        return fluent_inbox
+        return fluent_inbox["id"]
 
     def move_mail(self, outlook_mail, target_folder):
         outlook_mail.raw_mail.moveToFolder(str(target_folder["id"]))
