@@ -29,12 +29,16 @@ class FluentInboxAdv(object):
         },
     }
 
-    def __init__(self, verify=True, connection=None):
+    def __init__(self, verify=True, connection=None, o365_url_generator=None):
         """ Creates a new inbox wrapper.
 
         :param verify: whether or not to verify SSL certificate
         """
-        self.url = FluentInboxAdv._get_url('inbox')
+        self.o365_url_generator = o365_url_generator
+        if self.o365_url_generator is None:
+            self.url = FluentInboxAdv._get_url('inbox')
+        else:
+            self.url = self.o365_url_generator.get_inbox_url()
         self.fetched_count = 0
         self._filter = ''
         self._search = ''
@@ -92,7 +96,10 @@ class FluentInboxAdv(object):
             folders_url = FluentInboxAdv._get_url('child_folders').format(
                 folder_id=parent_id)
         else:
-            folders_url = FluentInboxAdv._get_url('folders')
+            if self.o365_url_generator is None:
+                folders_url = FluentInboxAdv._get_url('folders')
+            else:
+                folders_url = self.o365_url_generator.get_folders_url()
 
         response = self.connection.get_response(folders_url,
                                                 verify=self.verify,

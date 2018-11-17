@@ -1,7 +1,6 @@
 import base64
 
 from django_outlook.management.mail_to_handle_base import MailToHandleBase
-import urllib
 from bs4 import BeautifulSoup
 
 
