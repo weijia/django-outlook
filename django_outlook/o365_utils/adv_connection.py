@@ -18,6 +18,7 @@ class OutlookConnection(object):
 
     def __init__(self, client_id, client_secret, token_storage):
         super(OutlookConnection, self).__init__()
+        self.redirect_url = 'https://localhost:8080/django_outlook/result/'
         self.client_id = client_id
         self.client_secret = client_secret
         self.client_id = self.client_id
@@ -28,11 +29,11 @@ class OutlookConnection(object):
         # self.auth = None
 
         # Proxy call is required only if you are behind proxy
-        self.set_proxy(url=get_local_key("proxy_setting.http_proxy_host"),
-                       port=8080,
-                       username=get_local_key("laptop_account.username"),
-                       password=get_local_key("laptop_account.password")
-                       )
+        # self.set_proxy(url=get_local_key("proxy_setting.http_proxy_host"),
+        #                port=8080,
+        #                username=get_local_key("laptop_account.username"),
+        #                password=get_local_key("laptop_account.password")
+        #                )
 
     def set_proxy(self, url, port, username, password):
         """ Connect to Office 365 though the specified proxy
@@ -51,7 +52,7 @@ class OutlookConnection(object):
 
     def load_token(self):
         self.oauth = OAuth2Session(client_id=self.client_id,
-                                         token=self.token_storage.get_token())
+                                   token=self.token_storage.get_token())
 
     def get_auth_url(self):
         self._set_oauth_session()
@@ -62,11 +63,13 @@ class OutlookConnection(object):
         self.token_storage.save_state(state)
         return auth_url
 
-    def update_extra_data(self, auth_resp):
+    def update_extra_data(self, auth_resp, state):
         try:
-            token = self._get_token(auth_resp, self.token_storage.get_stored_state())
+            if state is None:
+                state = self.token_storage.get_stored_state()
+            token = self._get_token(auth_resp, state)
             me_dict = self.get_me()
-            self.token_storage.save_first_token(token, me_dict["mail"])
+            self.token_storage.save_first_token(token, me_dict)
             res = {"json_key": str(token)}
         except Exception as e:
             res = {"json_key": str(e.message)}
@@ -85,10 +88,12 @@ class OutlookConnection(object):
 
     def _set_oauth_session(self, state=None):
         self.oauth = OAuth2Session(client_id=self.client_id,
-                                   redirect_uri='https://outlook.office365.com/owa/',
+                                   redirect_uri=self.redirect_url,
                                    scope=[
                                        'https://graph.microsoft.com/Mail.ReadWrite',
                                        'https://graph.microsoft.com/Mail.Send',
+                                       'https://graph.microsoft.com/Mail.Read.Shared',
+                                       'https://graph.microsoft.com/Mail.ReadWrite.Shared',
                                        'https://graph.microsoft.com/User.Read',
                                        # 'https://outlook.office.com/mail.readwrite',
                                        'offline_access',

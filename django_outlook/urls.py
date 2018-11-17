@@ -7,8 +7,8 @@ from djangoautoconf.model_utils.url_for_models import add_all_urls
 
 
 urlpatterns = [
-    url(r'result/', login_required(OutlookLoginResultView.as_view()), name="o365_token_update_view"),
-    url(r'', login_required(O365AuthRedirectView.as_view()), name="o365_auth_redirect_view"),
+    url(r'result/', OutlookLoginResultView.as_view(), name="o365_token_update_view"),
+    url(r'', O365AuthRedirectView.as_view(), name="o365_auth_redirect_view"),
     ]
 
 add_all_urls(urlpatterns, models)

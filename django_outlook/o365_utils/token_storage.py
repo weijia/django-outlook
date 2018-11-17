@@ -32,7 +32,8 @@ class TokenStorage(object):
         auth = self.get_auth_obj()
         return auth.extra_data
 
-    def save_first_token(self, token, mail_of_user_grant_the_token):
+    def save_first_token(self, token, user_info):
+        mail_of_user_grant_the_token = user_info["mail"]
         o = self._get_ongoing_social_auth()
         if self.is_stored_social_auth_exists(mail_of_user_grant_the_token):
             o.delete()

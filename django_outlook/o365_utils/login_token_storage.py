@@ -1,3 +1,7 @@
+import string
+from random import choice, randint
+
+from django.contrib.auth.models import User
 from social.apps.django_app.default.models import UserSocialAuth
 
 
@@ -22,7 +26,7 @@ class LoginTokenStorage(object):
     PROVIDER = "o365-outlook"
 
     def __init__(self, current_user, mail_of_user_grant_the_token=None):
-        super(TokenStorage, self).__init__()
+        super(LoginTokenStorage, self).__init__()
         self.current_user = current_user
         self.mail_of_user_grant_the_token = mail_of_user_grant_the_token
 
@@ -32,14 +36,17 @@ class LoginTokenStorage(object):
         auth = self.get_auth_obj()
         return auth.extra_data
 
-    def save_first_token(self, token, mail_of_user_grant_the_token):
-        o = self._get_ongoing_social_auth()
-        if self.is_stored_social_auth_exists(mail_of_user_grant_the_token):
-            o.delete()
-            o = self.get_stored_social_auth(mail_of_user_grant_the_token)
-        else:
-            o.uid = mail_of_user_grant_the_token
-            o.provider = self.PROVIDER
+    def save_first_token(self, token, user_info):
+        characters = string.ascii_letters + string.punctuation + string.digits
+        password = "".join(choice(characters) for x in range(randint(8, 16)))
+        user, is_user_created = User.objects.get_or_create(username=user_info["mail"],
+                                                           email=user_info["mail"], )
+        user.password = password
+        o, is_social_auth_created = UserSocialAuth.objects.get_or_create(
+            user=user,
+            provider=self.PROVIDER,
+            uid=user_info["id"],
+        )
         o.extra_data = token
         o.save()
 
@@ -69,13 +76,7 @@ class LoginTokenStorage(object):
         return state
 
     def save_state(self, state):
-        o, is_created = UserSocialAuth.objects.get_or_create(
-            user=self.current_user,
-            provider=self.PROVIDER_FOR_ONGOING_AUTH,
-            uid=(self.get_uid()),
-        )
-        o.extra_data = {"state": state}
-        o.save()
+        pass
 
     def get_uid(self):
         if self.mail_of_user_grant_the_token is None:
