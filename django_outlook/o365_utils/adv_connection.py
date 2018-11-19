@@ -16,8 +16,9 @@ class OutlookConnection(object):
     _oauth2_token_url = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
     api_version = '2.0'
 
-    def __init__(self, client_id, client_secret, token_storage):
+    def __init__(self, client_id, client_secret, token_storage, redirect_url="https://outlook.office365.com/owa/"):
         super(OutlookConnection, self).__init__()
+        self.redirect_url = redirect_url
         self.client_id = client_id
         self.client_secret = client_secret
         self.client_id = self.client_id
@@ -51,7 +52,7 @@ class OutlookConnection(object):
 
     def load_token(self):
         self.oauth = OAuth2Session(client_id=self.client_id,
-                                         token=self.token_storage.get_token())
+                                   token=self.token_storage.get_token())
 
     def get_auth_url(self):
         self._set_oauth_session()
@@ -62,11 +63,13 @@ class OutlookConnection(object):
         self.token_storage.save_state(state)
         return auth_url
 
-    def update_extra_data(self, auth_resp):
+    def update_extra_data(self, auth_resp, state):
         try:
-            token = self._get_token(auth_resp, self.token_storage.get_stored_state())
+            if state is None:
+                state = self.token_storage.get_stored_state()
+            token = self._get_token(auth_resp, state)
             me_dict = self.get_me()
-            self.token_storage.save_first_token(token, me_dict["mail"])
+            self.token_storage.save_first_token(token, me_dict)
             res = {"json_key": str(token)}
         except Exception as e:
             res = {"json_key": str(e.message)}
@@ -85,10 +88,12 @@ class OutlookConnection(object):
 
     def _set_oauth_session(self, state=None):
         self.oauth = OAuth2Session(client_id=self.client_id,
-                                   redirect_uri='https://outlook.office365.com/owa/',
+                                   redirect_uri=self.redirect_url,
                                    scope=[
                                        'https://graph.microsoft.com/Mail.ReadWrite',
                                        'https://graph.microsoft.com/Mail.Send',
+                                       'https://graph.microsoft.com/Mail.Read.Shared',
+                                       'https://graph.microsoft.com/Mail.ReadWrite.Shared',
                                        'https://graph.microsoft.com/User.Read',
                                        # 'https://outlook.office.com/mail.readwrite',
                                        'offline_access',
