@@ -1,21 +1,4 @@
-# from allauth.account.forms import LoginForm
-# from allauth.socialaccount.providers.openid.forms import LoginForm
-# from cms.test_utils.project.sampleapp.forms import LoginForm
-# from allauth.account.forms import LoginForm
 from django.views.generic import TemplateView, RedirectView
-
-# from django_th.forms.base import LoginForm
-# from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSocialAuth
-
-# from django_outlook.forms import LoginForm
-
-# class OutlookLoginFormView(FormView):
-#     form_class = LoginForm
-#     template_name = 'django_outlook/login_form.html'
-#
-#     def form_valid(self, form):
-#         get_auth_url()
-#         return super(OutlookLoginFormView, self).form_valid(form)
 from django_outlook.o365_utils.adv_connection import OutlookConnection
 from django_outlook.o365_utils.login_token_storage import LoginTokenStorage
 from django_outlook.o365_utils.token_storage import TokenStorage
@@ -24,10 +7,7 @@ from djangoautoconf.local_key_manager import get_local_key
 
 
 class O365AuthRedirectView(RedirectView):
-    permanent = False
-
-    # query_string = True
-    # pattern_name = 'article-detail'
+    permanent = False  # Not always redirect to the same page
 
     def get_redirect_url(self, *args, **kwargs):
         # article = get_object_or_404(Article, pk=kwargs['pk'])
@@ -62,10 +42,7 @@ class OutlookAuthResultView(TemplateView):
 
 
 class O365LoginRedirectView(RedirectView):
-    permanent = False
-
-    # query_string = True
-    # pattern_name = 'article-detail'
+    permanent = False  # Not always redirect to the same page
 
     def get_redirect_url(self, *args, **kwargs):
         # article = get_object_or_404(Article, pk=kwargs['pk'])
