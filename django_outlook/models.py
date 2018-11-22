@@ -1,8 +1,7 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django_extensions.db.fields.json import JSONField
 from django_extensions.db.models import TimeStampedModel
-from social.apps.django_app.default.models import AbstractUserSocialAuth, UserSocialAuth
+from social.apps.django_app.default.models import UserSocialAuth
 
 
 # class MicrosoftOauth(models.Model):
