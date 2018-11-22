@@ -13,7 +13,12 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [ ]
 
-setup_requirements = [ ]
+setup_requirements = [
+    'django-mailbox',
+    'python-social-auth',
+    'social-auth-app-django',
+    'o365<1.0',
+]
 
 test_requirements = [ ]
 
@@ -37,14 +42,22 @@ setup(
     install_requires=requirements,
     license="MIT license",
     long_description=readme + '\n\n' + history,
-    include_package_data=True,
+    # include_package_data=True,
     keywords='django_outlook',
     name='django-outlook',
-    packages=find_packages(include=['django_outlook']),
+    packages=find_packages(include=[
+        'django_outlook',
+        'django_outlook.management',
+        'django_outlook.migrations',
+        'django_outlook.o365_utils',
+                                    ]),
+    # package_dir={'django_outlook': 'django_outlook'},
+    # package_data={"django_outlook": ["templates/*"]},
+    # data_files=[("templates", ["templates/*"])],
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/weijia/django-outlook',
-    version='0.1.0',
+    version='0.1.2',
     zip_safe=False,
 )
