@@ -24,10 +24,10 @@ class OutlookReaderForO365(object):
         self.fluent_inbox = FluentInboxAdv(connection=self.connection, o365_url_generator=O365UrlGenerator(target_mail))
 
     def enum_inbox_mails(self, count=1000):
-        mail = self.fluent_inbox.fetch(1)[0]
-        yield O365Mail(mail)
-        for i in xrange(1, count):
-            mail = self.fluent_inbox.fetch_next()[0]
+        # mail = self.fluent_inbox.fetch(1)[0]
+        # yield O365Mail(mail)
+        # for i in xrange(1, count):
+        for mail in self.fluent_inbox.fetch_next(count):
             yield O365Mail(mail)
 
     def get_folder(self, mailbox_name_pattern):
