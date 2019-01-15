@@ -47,7 +47,8 @@ class O365Mail(MailToHandleBase):
     def get_recipients(self):
         res = []
         for to in self.raw_mail.json["toRecipients"]:
-            res.append(to["emailAddress"]["address"])
+            if "address" in to["emailAddress"]:
+                res.append(to["emailAddress"]["address"])
         return res
 
     def get_mail_specific_link(self):
