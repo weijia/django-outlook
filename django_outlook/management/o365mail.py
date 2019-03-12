@@ -36,10 +36,16 @@ class O365Mail(MailToHandleBase):
         return self.raw_mail.json["subject"]
 
     def is_valid(self):
-        return True
+        return self.get_sender() is not None
 
     def get_sender(self):
-        return self.raw_mail.json["sender"]["emailAddress"]["address"]
+        if "sender" in self.raw_mail.json and self.raw_mail.json["sender"] is not None:
+            if "emailAddress" in self.raw_mail.json["sender"] and self.raw_mail.json["sender"]["emailAddress"] is not None:
+                return self.raw_mail.json["sender"]["emailAddress"]["address"]
+            else:
+                print(self.raw_mail.json["sender"])
+        else:
+            print self.raw_mail.json
 
     def get_receive_datetime(self):
         return self.raw_mail.json["receivedDateTime"]
