@@ -134,7 +134,7 @@ class OutlookConnection(object):
         return response_json
 
     def post_common_response(self, request_url, **kwargs):
-        con_params = {}
+        con_params = {"timeout": 120}
         if self.proxy_dict:
             con_params['proxies'] = self.proxy_dict
         con_params.update(kwargs)
